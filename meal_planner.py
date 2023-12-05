@@ -3,7 +3,7 @@ import requests
 import random
 from art import *
 import webbrowser
-from send_and_receive import TcpConnect
+from send_and_receive_class import TcpConnect
 from docx import Document
 
 """
@@ -13,18 +13,6 @@ This project uses the edamam API to obtain recipes, with the API information bel
     
 Requires installation of art via "pip install art" in console.
 Requires installation of docx via "pip install python-docx" in console.
-
-Program Flow:
-    Ask if user wants an explanation
-    Ask for search or browse
-    Ask for ingredients to include, give example format
-    Ask for # of recipes, 1 - 20
-    Ask for ingredients to exclude, give example format    
-    Display recipe results    
-    Ask to save recipe(s)
-    Have user pick recipe(s) 
-    Ask user if they want to search again for another recipe
-    Ask to save recipe/ingredients in Word
 """
 # -----------------------------------------------------------------------------------------------------------------
 # SETUP TCP CONNECTION WITH TCPCONNECT CLASS

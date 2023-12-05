@@ -1,4 +1,4 @@
-from send_and_receive import TcpConnect
+from send_and_receive_class import TcpConnect
 
 # -----------------------------------------------------------------------------------------------------------------
 # SERVER/MICRO SOCKET SETUP
