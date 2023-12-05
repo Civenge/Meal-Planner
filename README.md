@@ -5,7 +5,8 @@ This application helps a user discover new recipes based upon user input.  Users
 All recipe data is gathered based upon a custom API request to Edamam.  Each search yields a random result, so a user is unlikely to see the same recipe twice even given the same input.  The api can be found at: https://developer.edamam.com//admin/applications/1409623863337 with documentation located at: https://developer.edamam.com/edamam-docs-recipe-api
 
 # Microservice
-This application utilizes a microservice to process the recipe JSON data which returns a list of the recipe data and ingredients.   
+This application utilizes a microservice to process the recipe JSON data which returns a list of the recipe data and ingredients.  
+
 **UML Diagram Showing the Microservice Data Flow**
 
 ![image](https://github.com/Civenge/Meal-Planner/assets/91363144/a76238e3-f01a-4aec-9a42-342907a62aa1)
