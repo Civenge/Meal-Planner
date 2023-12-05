@@ -6,5 +6,6 @@ All recipe data is gathered based upon a custom API request to Edamam.  Each sea
 
 # Microservice
 This application utilizes a microservice to process the recipe JSON data which returns a list of the recipe data and ingredients.   
-**UML Diagram**
+**UML Diagram Showing the Microservice Data Flow**
+
 ![image](https://github.com/Civenge/Meal-Planner/assets/91363144/a76238e3-f01a-4aec-9a42-342907a62aa1)
