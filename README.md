@@ -7,6 +7,10 @@ All recipe data is gathered based upon a custom API request to Edamam.  Each sea
 # Microservice
 This application utilizes a microservice to process the recipe JSON data which returns a list of the recipe data and ingredients.  
 
+# Non-Microservice Version
+This is the same code but without the microservice functionality, which drastically speeds up the application.  To convert to an executable, install pyinstaller "pip install pyinstaller" in the console and then run the following command in the directory of the python file:
+pyinstaller --onefile meal_planner_no_microservice.py
+
 **UML Diagram Showing the Microservice Data Flow**
 
 ![image](https://github.com/Civenge/Meal-Planner/assets/91363144/a76238e3-f01a-4aec-9a42-342907a62aa1)
