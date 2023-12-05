@@ -203,6 +203,7 @@ while True:
             print(f"Url: {recipe_url}")
             for ingredient in ingredients:
                 print(f"  {ingredient}")
+            print("\n")
 
     else:
         print("API request failed with status code: ", response.status_code)
