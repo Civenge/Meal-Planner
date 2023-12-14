@@ -211,8 +211,8 @@ while True:
     else:
         print("API request failed with status code: ", response.status_code)
 
-    ask_add_to_shopping_list = input("Would you like to add any of these recipes to your saved recipes? (Yes or No)\n")
-    if ask_add_to_shopping_list.lower() == "y" or ask_add_to_shopping_list.lower() == "yes":
+    ask_add_saved_recipes = input("Would you like to add any of these recipes to your saved recipes? (Yes or No)\n")
+    if ask_add_saved_recipes.lower() == "y" or ask_add_saved_recipes.lower() == "yes":
 
         # loop to cover saving recipes
         while True:
