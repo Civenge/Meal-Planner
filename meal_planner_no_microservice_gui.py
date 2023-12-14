@@ -102,7 +102,7 @@ def search_recipes():
     ingredients = None
     selected_data = None
     food_list = None
-    excluded_ingredients_str = ""
+    excluded_ingredients_str = excluded_ingredients_entry.get()
     ingredients = ingredients_entry.get()
     num_recipes = int(num_recipes_entry.get())
 
@@ -170,11 +170,17 @@ root.title("Meal Planner")
 label = Label(root, text="Meal Planner")
 label.pack()
 
-instructions_label = Label(root, text="Enter ingredients (comma-separated):")
+instructions_label = Label(root, text="Enter ingredients to include (comma-separated):")
 instructions_label.pack()
 
 ingredients_entry = Entry(root, width=50)
 ingredients_entry.pack()
+
+excluded_ingredients_label = Label(root, text="Enter ingredients to exclude (comma-separated):")
+excluded_ingredients_label.pack()
+
+excluded_ingredients_entry = Entry(root, width=50)
+excluded_ingredients_entry.pack()
 
 num_recipes_label = Label(root, text="Enter the number of recipes (1 to 20):")
 num_recipes_label.pack()
