@@ -4,6 +4,8 @@ import random
 from art import *
 import webbrowser
 from docx import Document
+from colorama import init, Fore, Style
+init()
 
 """
 This project uses the edamam API to obtain recipes, with the API information below:
@@ -12,18 +14,21 @@ This project uses the edamam API to obtain recipes, with the API information bel
     
 Requires installation of art via "pip install art" in console.
 Requires installation of docx via "pip install python-docx" in console.
+Requires installation of colorama via "pip install colorama" in console.
+"""
+"""
+----------------------------------------------------------------------------
+Functions
+----------------------------------------------------------------------------
 """
 
-tprint("Meal Planner")
-# unicode is for italics and green
-print("\033[3m\033[92mThis program will take approximately 30 seconds to complete for a single recipe.\033[0m")
-print("* Use this program to pick out recipes and save a list of new recipes to try!")
-print("* Start by inputting some ingredients that you want to use to find a recipe.")
-print("* There will be an opportunity to export any saved recipes at the end of the search.")
-print("* Would you like more information about this program prior to starting the search? (Yes or No)\n")
 
-# global to store recipes
-new_data = {"hits": []}
+def color_text_green(text):
+    return Fore.GREEN + text + Style.RESET_ALL
+
+
+def color_text_red(text):
+    return Fore.RED + text + Style.RESET_ALL
 
 
 def argument_handler(*args):
@@ -91,6 +96,23 @@ def create_ingredients_document(formatted_data):
     doc.save(response_filename)
 
 
+"""
+----------------------------------------------------------------------------
+Main Program
+----------------------------------------------------------------------------
+"""
+
+tprint("Meal Planner")
+# uses colorama for setting green text
+print(color_text_green("This program will take approximately 30 seconds to complete for a single recipe."))
+print("* Use this program to pick out recipes and save a list of new recipes to try!")
+print("* Start by inputting some ingredients that you want to use to find a recipe.")
+print("* There will be an opportunity to export any saved recipes at the end of the search.")
+print("* Would you like more information about this program prior to starting the search? (Yes or No)\n")
+
+# global to store recipes
+new_data = {"hits": []}
+
 user_input = input().lower()
 if user_input == "yes" or user_input == "y":
     print("This is a program that will take in 5 inputs from a user to help you find a recipe.")
@@ -129,7 +151,7 @@ while True:
                 "&field=ingredientLines")
             dict_from_json = json.loads(test_response.text)
             if not dict_from_json["hits"]:
-                print(f"\033[1m\033[91mYour search for {ingredients} found no recipes, please try again.\033[0m")
+                print(color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
                 food_list = None
         else:
             print("Please select at least one ingredient.\n")
@@ -141,7 +163,7 @@ while True:
             num_recipes = int(recipe_count)
             if 1 <= num_recipes <= 20:
                 break
-        print(f"\033[1m\033[91mPlease pick a number between 1 and 20.\033[0m\n")
+        print(color_text_red(f"Please pick a number between 1 and 20"))
         recipe_count = ""
         num_recipes = None
 
@@ -166,7 +188,7 @@ while True:
         # parse the json
         dict_from_json = json.loads(response.text)
         if not dict_from_json["hits"]:
-            print(f"\033[1m\033[91mYour search for {ingredients} found no recipes, please try again.\033[0m")
+            print(color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
             exit(1)
         selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
         selected_data = {
@@ -214,21 +236,20 @@ while True:
 
             # check for negative inputs
             if int(min(integer_list)) <= 0:
-                print(
-                    f"\033[1m\033[91mPlease select more than 0 recipes and make sure every selection is valid.\033[0m")
+                print(color_text_red(f"Please select more than 0 recipes and make sure every selection is valid."))
                 continue
 
             # verifies save choices are within range and selection isn't greater than recipe count
             if len(integer_list) <= num_recipes and int(max(integer_list)) <= num_recipes:
                 print(f"Here is what you selected: {integer_list}\n")
-                print("******* Adding recipes to saved recipes... *******\n")
+                print(color_text_green("******* Adding recipes to saved recipes... *******\n"))
 
                 for idx in range(len(integer_list)):
                     new_data["hits"].append(selected_data["hits"][integer_list[idx] - 1])
                 break
 
             else:
-                print(f"\033[1m\033[91mPlease select less recipes or make sure every selection is valid.\033[0m")
+                print(color_text_red(f"Please select less recipes or make sure every selection is valid."))
 
     ask_another_recipe = input("Would you like to search for another recipe? (Yes or No)\n")
     if ask_another_recipe.lower() == "y" or ask_another_recipe.lower() == "yes":
@@ -289,7 +310,7 @@ while True:
                     break
 
                 else:
-                    print(f"\033[1m\033[91mPlease enter 1, 2, 3, or type 0 to exit.\033[0m")
+                    print(color_text_red(f"Please enter 1, 2, 3, or type 0 to exit."))
                     continue
 
         print("Goodbye!")
