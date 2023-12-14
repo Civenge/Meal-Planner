@@ -172,9 +172,13 @@ Main Program
 root = Tk()
 root.title("Meal Planner")
 
-# GUI Components
-label = Label(root, text="Meal Planner")
-label.pack()
+bg_color = root.cget("bg")
+
+header_text = Text(root, height=1, width=len("Meal Planner App!"), font=('Times New Roman', 48, 'bold'), bg=bg_color)
+header_text.insert(INSERT, "Meal Planner App!")
+header_text.tag_configure("center", justify=CENTER)
+header_text.tag_add("center", 1.0, "end")
+header_text.pack()
 
 instructions_label = Label(root, text="Enter ingredients to include (comma-separated):")
 instructions_label.pack()
