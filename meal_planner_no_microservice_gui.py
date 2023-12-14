@@ -9,6 +9,15 @@ import webbrowser
 from docx import Document
 
 init()
+"""
+----------------------------------------------------------------------------
+Globals
+----------------------------------------------------------------------------
+"""
+# global to store recipes
+new_data = {"hits": []}
+selected_data = {"hits": []}
+
 
 """
 ----------------------------------------------------------------------------
@@ -48,32 +57,6 @@ def process_food_list(input_list):
     return api_string
 
 
-def create_recipe_document(recipe_list):
-    # create new document
-    doc = Document()
-    # add heading
-    doc.add_heading("Saved Recipes")
-
-    # add each recipe to document
-    for recipe_info in recipe_list[0]:
-        for result_number, recipe_details in recipe_info.items():
-            title_paragraph = doc.add_paragraph()
-            runner = title_paragraph.add_run(f"Recipe Title: {recipe_details['recipe']['label']}")
-            runner.bold = True
-            doc.add_paragraph(f"URL: {recipe_details['recipe']['url']}")
-
-            # add ingredients as bulleted list
-            doc.add_paragraph(f"Ingredients: ")
-            for each_ingredient in recipe_details['recipe']['ingredientLines']:
-                ingredient_paragraph = doc.add_paragraph(f"{each_ingredient}")
-                ingredient_paragraph.style = 'List Bullet'
-
-            doc.add_paragraph("\n")
-
-    response_filename = 'Recipes.docx'
-    doc.save(response_filename)
-
-
 def create_ingredients_document(formatted_data):
     # create new document
     doc = Document()
@@ -96,19 +79,17 @@ def browse_recipes():
 
 
 def search_recipes():
+    global selected_data
     # clear existing text
     output_text.delete(1.0, END)
-    # global to store recipes
-    new_data = {"hits": []}
     # create variables to store ingredients and saved recipes between loop runs
     ingredients = None
-    selected_data = None
     formatted_string = None
     food_list = None
     excluded_ingredients_str = excluded_ingredients_entry.get()
     ingredients = ingredients_entry.get()
     if not ingredients:
-        output_text.insert(END, color_text_red("Please enter the number of recipes.\n"))
+        output_text.insert(END, "Please enter the number of recipes.\n")
         return
     num_recipes = int(num_recipes_entry.get())
     # Add your logic for searching recipes here
@@ -121,11 +102,11 @@ def search_recipes():
             "&field=ingredientLines")
         dict_from_json = json.loads(test_response.text)
         if not dict_from_json["hits"]:
-            output_text.insert(END, color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
+            output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
             food_list = None
             return
     else:
-        output_text.insert(END, color_text_red("Please select at least one ingredient.\n"))
+        output_text.insert(END, "Please select at least one ingredient.\n")
         return
     formatted_string = process_food_list(food_list)
 
@@ -136,7 +117,7 @@ def search_recipes():
         # parse the json
         dict_from_json = json.loads(response.text)
         if not dict_from_json["hits"]:
-            output_text.insert(END, color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
+            output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
             exit(1)
         selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
         selected_data = {
@@ -161,53 +142,151 @@ def search_recipes():
         output_text.insert(END, f"API request failed with status code: {response.status_code}")
 
 
+def save_recipes():
+    global selected_data
+    global new_data
+    global output_text
+    saved_recipes = saved_recipes_entry.get()
+    if not saved_recipes:
+        output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
+        return
+    split_values = saved_recipes.split(',')
+    # remove whitespace in list
+    current_saved_recipe_list = []
+    for x in split_values:
+        stripped_x = x.strip()
+        current_saved_recipe_list.append(stripped_x)
+
+    # removes non number values, but leaves a single negative sign if found (-)
+    integer_list = []
+    for x in current_saved_recipe_list:
+        stripped_x = x.lstrip('-')
+        if stripped_x.isdigit():
+            integer_list.append(int(x))
+
+    if int(min(integer_list)) <= 0:
+        output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
+        return
+
+    output_text.insert(END, f"Here is what you selected: {integer_list}\n")
+    output_text.insert(END, "******* Adding recipes to saved recipes... *******\n")
+
+    for idx in range(len(integer_list)):
+        new_data["hits"].append(selected_data["hits"][integer_list[idx] - 1])
+
+    #TODO: remove this output_text, testing only
+    output_text.insert(END, f"{new_data}")
+    return
 
 
-"""
-----------------------------------------------------------------------------
-Main Program
-----------------------------------------------------------------------------
-"""
+def create_recipe_document():
+    total_recipes = []
+    just_ingredients = []
+    modified_data = [total_recipes, just_ingredients]
+    for i, recipe_data in enumerate(new_data['hits'], start=1):
+        # rename the recipe so they go in ascending order
+        new_name = 'recipe ' + str(i)
 
-root = Tk()
-root.title("Meal Planner")
+        # create the new recipe dictionary
+        new_recipe = {new_name: recipe_data}
 
-bg_color = root.cget("bg")
+        # add new recipe to list
+        total_recipes.append(new_recipe)
 
-header_text = Text(root, height=1, width=len("Meal Planner App!"), font=('Times New Roman', 48, 'bold'), bg=bg_color)
-header_text.insert(INSERT, "Meal Planner App!")
-header_text.tag_configure("center", justify=CENTER)
-header_text.tag_add("center", 1.0, "end")
-header_text.pack()
+        # isolate the ingredients list from the recipe
+        new_ingredients = {new_name + ' ingredients': recipe_data['recipe']['ingredientLines']}
 
-instructions_label = Label(root, text="Enter ingredients to include (comma-separated):")
-instructions_label.pack()
+        # add isolated ingredients to list of ingredients
+        just_ingredients.append(new_ingredients)
 
-ingredients_entry = Entry(root, width=50)
-ingredients_entry.pack()
+        # create new document
+        doc = Document()
+        # add heading
+        doc.add_heading("Saved Recipes")
 
-excluded_ingredients_label = Label(root, text="Enter ingredients to exclude (comma-separated):")
-excluded_ingredients_label.pack()
+        # add each recipe to document
+        for recipe_info in modified_data[0]:
+            for result_number, recipe_details in recipe_info.items():
+                title_paragraph = doc.add_paragraph()
+                runner = title_paragraph.add_run(f"Recipe Title: {recipe_details['recipe']['label']}")
+                runner.bold = True
+                doc.add_paragraph(f"URL: {recipe_details['recipe']['url']}")
 
-excluded_ingredients_entry = Entry(root, width=50)
-excluded_ingredients_entry.pack()
+                # add ingredients as bulleted list
+                doc.add_paragraph(f"Ingredients: ")
+                for each_ingredient in recipe_details['recipe']['ingredientLines']:
+                    ingredient_paragraph = doc.add_paragraph(f"{each_ingredient}")
+                    ingredient_paragraph.style = 'List Bullet'
 
-num_recipes_label = Label(root, text="Enter the number of recipes (1 to 20):")
-num_recipes_label.pack()
+                doc.add_paragraph("\n")
 
-num_recipes_entry = Entry(root)
-num_recipes_entry.pack()
+        response_filename = 'Recipes.docx'
+        doc.save(response_filename)
 
-button_frame = Frame(root)
-button_frame.pack()
 
-search_button = Button(button_frame, text="Search Recipes", command=search_recipes)
-search_button.pack(side=LEFT)
+def main():
+    global output_text
+    global excluded_ingredients_entry
+    global ingredients_entry
+    global num_recipes_entry
+    global saved_recipes_entry
+    """
+    ----------------------------------------------------------------------------
+    Main Program
+    ----------------------------------------------------------------------------
+    """
 
-browse_button = Button(button_frame, text="Browse Recipes", command=browse_recipes)
-browse_button.pack(side=RIGHT)
+    root = Tk()
+    root.title("Meal Planner")
 
-output_text = scrolledtext.ScrolledText(root, width=70, height=50)
-output_text.pack()
+    bg_color = root.cget("bg")
 
-root.mainloop()
+    header_text = Text(root, height=1, width=len("Meal Planner App"), font=('Times New Roman', 48, 'bold'), bg=bg_color)
+    header_text.insert(INSERT, "Meal Planner App!")
+    header_text.tag_configure("center", justify=CENTER)
+    header_text.tag_add("center", 1.0, "end")
+    header_text.pack()
+
+    instructions_label = Label(root, text="Enter ingredients to include (comma-separated):")
+    instructions_label.pack()
+
+    ingredients_entry = Entry(root, width=50)
+    ingredients_entry.pack()
+
+    excluded_ingredients_label = Label(root, text="Enter ingredients to exclude (comma-separated):")
+    excluded_ingredients_label.pack()
+
+    excluded_ingredients_entry = Entry(root, width=50)
+    excluded_ingredients_entry.pack()
+
+    num_recipes_label = Label(root, text="Enter the number of recipes (1 to 20):")
+    num_recipes_label.pack()
+
+    num_recipes_entry = Entry(root)
+    num_recipes_entry.pack()
+
+    button_frame = Frame(root)
+    button_frame.pack()
+
+    search_button = Button(button_frame, text="Search Recipes", command=search_recipes)
+    search_button.pack(side=LEFT)
+
+    browse_button = Button(button_frame, text="Browse Recipes", command=browse_recipes)
+    browse_button.pack(side=RIGHT)
+
+    saved_recipes_label = Label(root, text="Enter recipe numbers to save (Ex: 1, 2, 4)")
+    saved_recipes_label.pack()
+
+    saved_recipes_entry = Entry(root)
+    saved_recipes_entry.pack()
+
+    save_recipe_button = Button(text="Save Recipes", command=save_recipes)
+    save_recipe_button.pack()
+
+    output_text = scrolledtext.ScrolledText(root, width=70, height=50)
+    output_text.pack()
+
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
