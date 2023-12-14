@@ -103,11 +103,14 @@ def search_recipes():
     # create variables to store ingredients and saved recipes between loop runs
     ingredients = None
     selected_data = None
+    formatted_string = None
     food_list = None
     excluded_ingredients_str = excluded_ingredients_entry.get()
     ingredients = ingredients_entry.get()
+    if not ingredients:
+        output_text.insert(END, color_text_red("Please enter the number of recipes.\n"))
+        return
     num_recipes = int(num_recipes_entry.get())
-
     # Add your logic for searching recipes here
     if ingredients:
         food_list = argument_handler(ingredients)
@@ -118,11 +121,12 @@ def search_recipes():
             "&field=ingredientLines")
         dict_from_json = json.loads(test_response.text)
         if not dict_from_json["hits"]:
-            print(color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
+            output_text.insert(END, color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
             food_list = None
+            return
     else:
-        print("Please select at least one ingredient.\n")
-
+        output_text.insert(END, color_text_red("Please select at least one ingredient.\n"))
+        return
     formatted_string = process_food_list(food_list)
 
     response = requests.get("https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
@@ -132,7 +136,7 @@ def search_recipes():
         # parse the json
         dict_from_json = json.loads(response.text)
         if not dict_from_json["hits"]:
-            print(color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
+            output_text.insert(END, color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
             exit(1)
         selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
         selected_data = {
