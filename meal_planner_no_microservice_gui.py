@@ -96,6 +96,8 @@ def browse_recipes():
 
 
 def search_recipes():
+    # clear existing text
+    output_text.delete(1.0, END)
     # global to store recipes
     new_data = {"hits": []}
     # create variables to store ingredients and saved recipes between loop runs
