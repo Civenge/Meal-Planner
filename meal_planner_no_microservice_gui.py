@@ -283,6 +283,11 @@ def main():
     save_recipe_button = Button(text="Save Recipes", command=save_recipes)
     save_recipe_button.pack()
 
+    export_recipe_to_word_button = Button(text="Export Saved Recipes to Word", command=create_recipe_document)
+    export_recipe_to_word_button.pack()
+
+
+
     output_text = scrolledtext.ScrolledText(root, width=70, height=50)
     output_text.pack()
 
