@@ -1,14 +1,11 @@
 import json
 import requests
 import random
-# from art import *
 from tkinter import *
-from tkinter import scrolledtext
-from colorama import init, Fore, Style
+from tkinter import scrolledtext, Tk, Button, messagebox
 import webbrowser
 from docx import Document
 
-init()
 """
 ----------------------------------------------------------------------------
 Globals
@@ -18,20 +15,11 @@ Globals
 new_data = {"hits": []}
 selected_data = {"hits": []}
 
-
 """
 ----------------------------------------------------------------------------
 Functions
 ----------------------------------------------------------------------------
 """
-
-
-def color_text_green(text):
-    return Fore.GREEN + text + Style.RESET_ALL
-
-
-def color_text_red(text):
-    return Fore.RED + text + Style.RESET_ALL
 
 
 def argument_handler(*args):
@@ -224,12 +212,18 @@ def create_recipe_document():
         doc.save(response_filename)
 
 
+def exit_app():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        root.destroy()
+
+
 def main():
     global output_text
     global excluded_ingredients_entry
     global ingredients_entry
     global num_recipes_entry
     global saved_recipes_entry
+    global root
     """
     ----------------------------------------------------------------------------
     Main Program
@@ -286,7 +280,8 @@ def main():
     export_recipe_to_word_button = Button(text="Export Saved Recipes to Word", command=create_recipe_document)
     export_recipe_to_word_button.pack()
 
-
+    exit_button = Button(root, text="Exit", command=exit_app)
+    exit_button.pack()
 
     output_text = scrolledtext.ScrolledText(root, width=70, height=50)
     output_text.pack()
