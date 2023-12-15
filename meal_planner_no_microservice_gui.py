@@ -155,6 +155,12 @@ def create_recipe_document():
     total_recipes = []
     just_ingredients = []
     modified_data = [total_recipes, just_ingredients]
+
+    # create new document
+    doc = Document()
+    # add heading
+    doc.add_heading("Saved Recipes")
+
     for i, recipe_data in enumerate(new_data['hits'], start=1):
         # rename the recipe so they go in ascending order
         new_name = 'recipe ' + str(i)
@@ -170,11 +176,6 @@ def create_recipe_document():
 
         # add isolated ingredients to list of ingredients
         just_ingredients.append(new_ingredients)
-
-        # create new document
-        doc = Document()
-        # add heading
-        doc.add_heading("Saved Recipes")
 
     # add each recipe to document
     for recipe_info in modified_data[0]:
@@ -303,7 +304,8 @@ def main():
     button_frame2 = Frame(root)
     button_frame2.pack()
 
-    export_recipe_to_word_button = Button(button_frame2, text="Export Saved Recipes to Word", command=create_recipe_document)
+    export_recipe_to_word_button = Button(button_frame2, text="Export Saved Recipes to Word",
+                                          command=create_recipe_document)
     export_recipe_to_word_button.pack(side=LEFT)
 
     export_ingredients_to_word_button = Button(button_frame2, text="Export Saved Ingredients to Word",
@@ -316,8 +318,8 @@ def main():
     output_text = scrolledtext.ScrolledText(root, width=70, height=40)
     output_text.pack()
 
-    Font_tuple = ("Times New Roman", 12)
-    output_text.configure(font=Font_tuple)
+    font_tuple = ("Times New Roman", 12)
+    output_text.configure(font=font_tuple)
 
     root.mainloop()
 
