@@ -306,7 +306,8 @@ def main():
     export_recipe_to_word_button = Button(button_frame2, text="Export Saved Recipes to Word", command=create_recipe_document)
     export_recipe_to_word_button.pack(side=LEFT)
 
-    export_ingredients_to_word_button = Button(button_frame2, text="Export Saved Ingredients to Word", command=create_ingredients_document)
+    export_ingredients_to_word_button = Button(button_frame2, text="Export Saved Ingredients to Word",
+                                               command=create_ingredients_document)
     export_ingredients_to_word_button.pack(side=RIGHT)
 
     exit_button = Button(root, text="Exit", command=exit_app)
@@ -314,6 +315,9 @@ def main():
 
     output_text = scrolledtext.ScrolledText(root, width=70, height=40)
     output_text.pack()
+
+    Font_tuple = ("Times New Roman", 12)
+    output_text.configure(font=Font_tuple)
 
     root.mainloop()
 
