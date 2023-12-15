@@ -70,10 +70,6 @@ def search_recipes():
     global selected_data
     # clear existing text
     output_text.delete(1.0, END)
-    # create variables to store ingredients and saved recipes between loop runs
-    ingredients = None
-    formatted_string = None
-    food_list = None
     excluded_ingredients_str = excluded_ingredients_entry.get()
     ingredients = ingredients_entry.get()
     if not ingredients:
@@ -91,7 +87,6 @@ def search_recipes():
         dict_from_json = json.loads(test_response.text)
         if not dict_from_json["hits"]:
             output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
-            food_list = None
             return
     else:
         output_text.insert(END, "Please select at least one ingredient.\n")
@@ -162,8 +157,6 @@ def save_recipes():
     for idx in range(len(integer_list)):
         new_data["hits"].append(selected_data["hits"][integer_list[idx] - 1])
 
-    #TODO: remove this output_text, testing only
-    output_text.insert(END, f"{new_data}")
     return
 
 
@@ -287,6 +280,7 @@ def main():
     output_text.pack()
 
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
