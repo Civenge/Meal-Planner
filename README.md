@@ -11,6 +11,9 @@ Alternatively, to convert meal_planner_no_microservice.py to a Windows executabl
 
 pyinstaller --onefile meal_planner_no_microservice.py
 
+# GUI Version
+This is a work in progress but includes a Tkinter GUI.
+
 # Microservice
 This application utilizes a microservice to process the recipe JSON data which returns a list of the recipe data and ingredients.  
 
