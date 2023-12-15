@@ -176,26 +176,26 @@ def create_recipe_document():
         # add heading
         doc.add_heading("Saved Recipes")
 
-        # add each recipe to document
-        for recipe_info in modified_data[0]:
-            for result_number, recipe_details in recipe_info.items():
-                title_paragraph = doc.add_paragraph()
-                runner = title_paragraph.add_run(f"Recipe Title: {recipe_details['recipe']['label']}")
-                runner.bold = True
-                doc.add_paragraph(f"URL: {recipe_details['recipe']['url']}")
+    # add each recipe to document
+    for recipe_info in modified_data[0]:
+        for result_number, recipe_details in recipe_info.items():
+            title_paragraph = doc.add_paragraph()
+            runner = title_paragraph.add_run(f"Recipe Title: {recipe_details['recipe']['label']}")
+            runner.bold = True
+            doc.add_paragraph(f"URL: {recipe_details['recipe']['url']}")
 
-                # add ingredients as bulleted list
-                doc.add_paragraph(f"Ingredients: ")
-                for each_ingredient in recipe_details['recipe']['ingredientLines']:
-                    ingredient_paragraph = doc.add_paragraph(f"{each_ingredient}")
-                    ingredient_paragraph.style = 'List Bullet'
+            # add ingredients as bulleted list
+            doc.add_paragraph(f"Ingredients: ")
+            for each_ingredient in recipe_details['recipe']['ingredientLines']:
+                ingredient_paragraph = doc.add_paragraph(f"{each_ingredient}")
+                ingredient_paragraph.style = 'List Bullet'
 
-                doc.add_paragraph("\n")
+            doc.add_paragraph("\n")
 
-        response_filename = 'Recipes.docx'
-        doc.save(response_filename)
+    response_filename = 'Recipes.docx'
+    doc.save(response_filename)
 
-        output_text.insert(END, "Creating 'Recipes.docx' file...")
+    output_text.insert(END, "Creating 'Recipes.docx' file...\n")
 
 
 def create_ingredients_document():
@@ -232,7 +232,7 @@ def create_ingredients_document():
     response_filename = 'Ingredients List.docx'
     doc.save(response_filename)
 
-    output_text.insert(END, "Creating 'Ingredients List.docx' file...")
+    output_text.insert(END, "Creating 'Ingredients List.docx' file...\n")
 
 
 def exit_app():
