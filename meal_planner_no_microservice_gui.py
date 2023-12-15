@@ -7,6 +7,13 @@ import webbrowser
 from docx import Document
 
 """
+This project uses the edamam API to obtain recipes, with the API information below:
+    api here: https://developer.edamam.com//admin/applications/1409623863337
+    api doc: https://developer.edamam.com/edamam-docs-recipe-api
+
+Requires installation of docx via "pip install python-docx" in console.
+"""
+"""
 ----------------------------------------------------------------------------
 Globals
 ----------------------------------------------------------------------------
