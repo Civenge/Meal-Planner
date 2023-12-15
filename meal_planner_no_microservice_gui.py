@@ -52,22 +52,6 @@ def process_food_list(input_list):
     return api_string
 
 
-def create_ingredients_document(formatted_data):
-    # create new document
-    doc = Document()
-    # add heading
-    doc.add_heading("Ingredients List")
-
-    # add each recipe to document
-    for recipe_info in formatted_data[0]:
-        for result_number, recipe_details in recipe_info.items():
-            for recipe_ingredient in recipe_details['recipe']['ingredientLines']:
-                doc.add_paragraph(f"{recipe_ingredient}")
-
-    response_filename = 'Ingredients List.docx'
-    doc.save(response_filename)
-
-
 def browse_recipes():
     url = "https://www.allrecipes.com/"
     webbrowser.open(url)
@@ -211,6 +195,45 @@ def create_recipe_document():
         response_filename = 'Recipes.docx'
         doc.save(response_filename)
 
+        output_text.insert(END, "Creating 'Recipes.docx' file...")
+
+
+def create_ingredients_document():
+    total_recipes = []
+    just_ingredients = []
+    modified_data = [total_recipes, just_ingredients]
+    for i, recipe_data in enumerate(new_data['hits'], start=1):
+        # rename the recipe so they go in ascending order
+        new_name = 'recipe ' + str(i)
+
+        # create the new recipe dictionary
+        new_recipe = {new_name: recipe_data}
+
+        # add new recipe to list
+        total_recipes.append(new_recipe)
+
+        # isolate the ingredients list from the recipe
+        new_ingredients = {new_name + ' ingredients': recipe_data['recipe']['ingredientLines']}
+
+        # add isolated ingredients to list of ingredients
+        just_ingredients.append(new_ingredients)
+
+    # create new document
+    doc = Document()
+    # add heading
+    doc.add_heading("Ingredients List")
+
+    # add each recipe to document
+    for recipe_info in modified_data[0]:
+        for result_number, recipe_details in recipe_info.items():
+            for recipe_ingredient in recipe_details['recipe']['ingredientLines']:
+                doc.add_paragraph(f"{recipe_ingredient}")
+
+    response_filename = 'Ingredients List.docx'
+    doc.save(response_filename)
+
+    output_text.insert(END, "Creating 'Ingredients List.docx' file...")
+
 
 def exit_app():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
@@ -277,13 +300,19 @@ def main():
     save_recipe_button = Button(text="Save Recipes", command=save_recipes)
     save_recipe_button.pack()
 
-    export_recipe_to_word_button = Button(text="Export Saved Recipes to Word", command=create_recipe_document)
-    export_recipe_to_word_button.pack()
+    button_frame2 = Frame(root)
+    button_frame2.pack()
+
+    export_recipe_to_word_button = Button(button_frame2, text="Export Saved Recipes to Word", command=create_recipe_document)
+    export_recipe_to_word_button.pack(side=LEFT)
+
+    export_ingredients_to_word_button = Button(button_frame2, text="Export Saved Ingredients to Word", command=create_ingredients_document)
+    export_ingredients_to_word_button.pack(side=RIGHT)
 
     exit_button = Button(root, text="Exit", command=exit_app)
     exit_button.pack()
 
-    output_text = scrolledtext.ScrolledText(root, width=70, height=50)
+    output_text = scrolledtext.ScrolledText(root, width=70, height=40)
     output_text.pack()
 
     root.mainloop()
