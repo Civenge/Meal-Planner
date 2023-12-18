@@ -250,19 +250,32 @@ def show_help():
     help_window = Toplevel(root)
     help_window.title("Help")
 
-    help_text = Text(help_window, width=50, height=10, wrap="word")
+    help_text = Text(help_window, width=70, height=20, wrap="word")
     help_text.pack()
-
-    help_text.insert(INSERT, "Help menu text...")
-
+    help_text.insert(INSERT, "The following link is a video to show how to use the Meal Planning App:\n\n")
     # Add a tag for the URL link
     help_text.tag_configure("link", foreground="blue", underline=True)
 
     # Insert the URL link with the "link" tag
-    help_text.insert(INSERT, "\nClick here for more information", "link")
+    help_text.insert(INSERT, "Video demonstration\n\n", "link")
 
     # Bind the click event to open the URL
-    help_text.tag_bind("link", "<Button-1>", lambda event: open_url("https://example.com"))
+    help_text.tag_bind("link", "<Button-1>", lambda event: open_url("https://youtu.be/aXo--GO7ogc"))
+
+    # Insert the URL link with the "link" tag
+    help_text.insert(INSERT, "This application is designed to be run from top to bottom.  Fill in each box and use the "
+                             "associated buttons.  Using the buttons without having filled in the appropriate box with "
+                             "valid information will lead to incorrect behavior.\n\n"
+                             "Start by filling in the ingredients that you wish to have in your recipe.  Each "
+                             "ingredient should be a single word.  For ingredients with multiple words, such as 'New "
+                             "York Roast', enter them as 3 words 'New', 'York', and 'Roast'.\n\n"
+                             "The 'Search Recipes' button will find recipes that match the criteria above.  If your "
+                             "preference is instead to browse for a recipe, then this button will direct you to a "
+                             "better resource to complete a browsing experience, as it falls outside the scope of this "
+                             "project.\n\n")
+
+
+
 
 
 def main():
