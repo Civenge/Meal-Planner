@@ -241,6 +241,30 @@ def exit_app():
         root.destroy()
 
 
+def open_url(url):
+    import webbrowser
+    webbrowser.open(url)
+
+
+def show_help():
+    help_window = Toplevel(root)
+    help_window.title("Help")
+
+    help_text = Text(help_window, width=50, height=10, wrap="word")
+    help_text.pack()
+
+    help_text.insert(INSERT, "Help menu text...")
+
+    # Add a tag for the URL link
+    help_text.tag_configure("link", foreground="blue", underline=True)
+
+    # Insert the URL link with the "link" tag
+    help_text.insert(INSERT, "\nClick here for more information", "link")
+
+    # Bind the click event to open the URL
+    help_text.tag_bind("link", "<Button-1>", lambda event: open_url("https://example.com"))
+
+
 def main():
     global output_text
     global excluded_ingredients_entry
@@ -258,6 +282,13 @@ def main():
     root.title("Meal Planner")
 
     bg_color = root.cget("bg")
+
+    menu_bar = Menu(root)
+    root.config(menu=menu_bar)
+
+    help_menu = Menu(menu_bar, tearoff=0)
+    menu_bar.add_cascade(label="Help", menu=help_menu)
+    help_menu.add_command(label="Help", command=show_help)
 
     header_text = Text(root, height=1, width=len("Meal Planner App"), font=('Times New Roman', 48, 'bold'), bg=bg_color)
     header_text.insert(INSERT, "Meal Planner App!")
