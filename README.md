@@ -12,7 +12,7 @@ This is a Command Line Interface version of the App.  This will allow for a fast
 
 Alternatively, to convert meal_planner_no_microservice.py to a Windows executable file, install pyinstaller "pip install pyinstaller" in the console and then run the following command in the directory of the python file:
 
-pyinstaller --onefile meal_planner_no_microservice.py
+pyinstaller --onefile meal_planner_cli.py
 
 # GUI Version
 This is a Graphical User Interface Version which supports the same functionality of the CLI version in simple to understand format.  This is the version shown in the video linked above.
