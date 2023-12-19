@@ -3,8 +3,8 @@ import requests
 import random
 from tkinter import *
 from tkinter import scrolledtext, Tk, Button, messagebox
-import webbrowser
 from docx import Document
+import meal_planner_lib
 
 """
 This project uses the edamam API to obtain recipes, with the API information below:
@@ -29,34 +29,6 @@ Functions
 """
 
 
-def argument_handler(*args):
-    if not args:
-        return "You need to provide at least 1 argument."
-    else:
-        return list(args)
-
-
-def remove_str_chars(input_string, num):
-    if num >= 0:
-        return input_string[:-num]
-    else:
-        return input_string
-
-
-def process_food_list(input_list):
-    request_string = ""
-    for food in input_list:
-        request_string = request_string + food + "%2c%20"
-    # remove the last %2c%20 from the collated string which is unicode for ", "
-    api_string = remove_str_chars(request_string, 6)
-    return api_string
-
-
-def browse_recipes():
-    url = "https://www.allrecipes.com/"
-    webbrowser.open(url)
-
-
 def search_recipes():
     global selected_data
     # clear existing text
@@ -69,8 +41,8 @@ def search_recipes():
     num_recipes = int(num_recipes_entry.get())
     # Add your logic for searching recipes here
     if ingredients:
-        food_list = argument_handler(ingredients)
-        formatted_string = process_food_list(food_list)
+        food_list = meal_planner_lib.argument_handler(ingredients)
+        formatted_string = meal_planner_lib.process_food_list(food_list)
         test_response = requests.get(
             "https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
             "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&random=true&field=url&field=label"
@@ -82,7 +54,7 @@ def search_recipes():
     else:
         output_text.insert(END, "Please select at least one ingredient.\n")
         return
-    formatted_string = process_food_list(food_list)
+    formatted_string = meal_planner_lib.process_food_list(food_list)
 
     response = requests.get("https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
                             "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&" + excluded_ingredients_str +
@@ -275,9 +247,6 @@ def show_help():
                              "project.\n\n")
 
 
-
-
-
 def main():
     global output_text
     global excluded_ingredients_entry
@@ -333,7 +302,7 @@ def main():
     search_button = Button(button_frame, text="Search Recipes", command=search_recipes)
     search_button.pack(side=LEFT)
 
-    browse_button = Button(button_frame, text="Browse Recipes", command=browse_recipes)
+    browse_button = Button(button_frame, text="Browse Recipes", command=meal_planner_lib.browse_recipes)
     browse_button.pack(side=RIGHT)
 
     saved_recipes_label = Label(root, text="Enter recipe numbers to save (Ex: 1, 2, 4)")
