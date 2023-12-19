@@ -29,7 +29,7 @@ Functions
 """
 
 
-def search_recipes():
+def search_recipes(output_text, excluded_ingredients_entry, ingredients_entry, num_recipes_entry):
     global selected_data
     # clear existing text
     output_text.delete(1.0, END)
@@ -88,10 +88,7 @@ def search_recipes():
         output_text.insert(END, f"API request failed with status code: {response.status_code}")
 
 
-def save_recipes():
-    global selected_data
-    global new_data
-    global output_text
+def save_recipes(selected_data, new_data, output_text):
     saved_recipes = saved_recipes_entry.get()
     if not saved_recipes:
         output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
@@ -301,7 +298,9 @@ def main():
     button_frame = Frame(root)
     button_frame.pack()
 
-    search_button = Button(button_frame, text="Search Recipes", command=search_recipes)
+    search_button = Button(button_frame, text="Search Recipes",
+                           command=lambda: search_recipes(output_text, excluded_ingredients_entry, ingredients_entry,
+                                                          num_recipes_entry))
     search_button.pack(side=LEFT)
 
     browse_button = Button(button_frame, text="Browse Recipes", command=meal_planner_lib.browse_recipes)
@@ -313,7 +312,7 @@ def main():
     saved_recipes_entry = Entry(root)
     saved_recipes_entry.pack()
 
-    save_recipe_button = Button(text="Save Recipes", command=save_recipes)
+    save_recipe_button = Button(text="Save Recipes", command=lambda: save_recipes(selected_data, new_data, output_text))
     save_recipe_button.pack()
 
     button_frame2 = Frame(root)
