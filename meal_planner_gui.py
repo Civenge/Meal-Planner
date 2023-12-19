@@ -247,6 +247,13 @@ def show_help():
                              "project.\n\n")
 
 
+"""
+----------------------------------------------------------------------------
+Main Program
+----------------------------------------------------------------------------
+"""
+
+
 def main():
     global output_text
     global excluded_ingredients_entry
@@ -254,11 +261,6 @@ def main():
     global num_recipes_entry
     global saved_recipes_entry
     global root
-    """
-    ----------------------------------------------------------------------------
-    Main Program
-    ----------------------------------------------------------------------------
-    """
 
     root = Tk()
     root.title("Meal Planner")
