@@ -1,6 +1,9 @@
+import json
 from tkinter import *
 from tkinter import scrolledtext, Tk, Button, messagebox
+import requests
 import meal_planner_lib
+import random
 
 """
 This project uses the edamam API to obtain recipes, with the API information below:
@@ -15,6 +18,7 @@ global num_recipes_entry
 global saved_recipes_entry
 global root
 
+
 """
 ----------------------------------------------------------------------------
 Functions
@@ -22,7 +26,72 @@ Functions
 """
 
 
-def save_recipes(selected_data, new_data, output_text):
+def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_entry_param, num_recipes_entry_param):
+    # clear existing text
+    output_text.delete(1.0, END)
+    excluded_ingredients_str = excluded_ingredients_entry_param.get()
+    ingredients = ingredients_entry_param.get()
+    if not ingredients:
+        show_error_message("Please enter the number of recipes.\n")
+        return
+    try:
+        num_recipes = int(num_recipes_entry_param.get())
+    except ValueError:
+        show_error_message("Please input a valid number.\n")
+        return
+    if num_recipes <= 0 or num_recipes > 20:
+        show_error_message("Please enter a valid positive number for the number of recipes.\n")
+        return
+    # Add your logic for searching recipes here
+    if ingredients:
+        food_list = meal_planner_lib.argument_handler(ingredients)
+        formatted_string = meal_planner_lib.process_food_list(food_list)
+        test_response = requests.get(
+            "https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
+            "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&random=true&field=url&field=label"
+            "&field=ingredientLines")
+        dict_from_json = json.loads(test_response.text)
+        if not dict_from_json["hits"]:
+            output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
+            return
+    else:
+        show_error_message("Please select at least one ingredient.\n")
+        return
+    formatted_string = meal_planner_lib.process_food_list(food_list)
+
+    response = requests.get("https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
+                            "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&" + excluded_ingredients_str +
+                            "&random=true&field=url&field=label&field=ingredientLines")
+    if response.status_code == 200:
+        # parse the json
+        dict_from_json = json.loads(response.text)
+        if not dict_from_json["hits"]:
+            output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
+            exit(1)
+        selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
+        meal_planner_lib.selected_data = {
+            "hits": selected_recipes
+        }
+        for i, recipe_data in enumerate(meal_planner_lib.selected_data["hits"], start=1):
+            recipe = recipe_data["recipe"]
+            recipe_url = recipe["url"]
+            recipe_name = recipe["label"]
+            ingredients = recipe_data["recipe"]["ingredientLines"]
+
+            # Append the recipe information to the text widget
+            output_text.insert(END, f"Recipe{i}: {recipe_name}\n")
+            output_text.insert(END, f"Url: {recipe_url}\n")
+
+            for ingredient in ingredients:
+                output_text.insert(END, f"  {ingredient}\n")
+
+            output_text.insert(END, "\n")
+
+    else:
+        output_text.insert(END, f"API request failed with status code: {response.status_code}")
+
+
+def save_recipes(output_text):
     saved_recipes = saved_recipes_entry.get()
     if not saved_recipes:
         output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
@@ -46,7 +115,7 @@ def save_recipes(selected_data, new_data, output_text):
         return
 
     for val in current_saved_recipe_list:
-        if int(val) < 0 or int(val) > len(selected_data["hits"]):
+        if int(val) < 0 or int(val) > len(meal_planner_lib.selected_data["hits"]):
             show_error_message(f"Please make sure your number is greater than 0 and less than total recipes "
                                f"searched.\n")
             return
@@ -55,7 +124,7 @@ def save_recipes(selected_data, new_data, output_text):
     output_text.insert(END, "******* Adding recipes to saved recipes... *******\n")
 
     for idx in range(len(integer_list)):
-        new_data["hits"].append(selected_data["hits"][integer_list[idx] - 1])
+        meal_planner_lib.new_data["hits"].append(meal_planner_lib.selected_data["hits"][integer_list[idx] - 1])
 
     return
 
@@ -171,8 +240,8 @@ def main():
     button_frame.pack()
 
     search_button = Button(button_frame, text="Search Recipes",
-                           command=lambda: meal_planner_lib.search_recipes(output_text, excluded_ingredients_entry,
-                                                                           ingredients_entry, num_recipes_entry))
+                           command=lambda: search_recipes(output_text, excluded_ingredients_entry,
+                                                          ingredients_entry, num_recipes_entry))
     search_button.pack(side=LEFT)
 
     browse_button = Button(button_frame, text="Browse Recipes", command=meal_planner_lib.browse_recipes)
@@ -185,8 +254,7 @@ def main():
     saved_recipes_entry.pack()
 
     save_recipe_button = Button(text="Save Recipes",
-                                command=lambda: save_recipes(meal_planner_lib.selected_data, meal_planner_lib.new_data,
-                                                             output_text))
+                                command=lambda: save_recipes(output_text))
     save_recipe_button.pack()
 
     button_frame2 = Frame(root)
