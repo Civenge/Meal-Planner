@@ -22,9 +22,6 @@ new_data = {"hits": []}
 selected_data = {"hits": []}
 
 
-
-
-
 def create_recipe_document():
     total_recipes = []
     just_ingredients = []
@@ -71,8 +68,6 @@ def create_recipe_document():
     doc.save(response_filename)
 
 
-
-
 def create_ingredients_document():
     total_recipes = []
     just_ingredients = []
@@ -106,8 +101,6 @@ def create_ingredients_document():
 
     response_filename = 'Ingredients List.docx'
     doc.save(response_filename)
-
-
 
 
 def open_url(url):

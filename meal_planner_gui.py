@@ -9,7 +9,11 @@ This project uses the edamam API to obtain recipes, with the API information bel
 
 Requires installation of docx via "pip install python-docx" in console.
 """
-
+global excluded_ingredients_entry
+global ingredients_entry
+global num_recipes_entry
+global saved_recipes_entry
+global root
 
 """
 ----------------------------------------------------------------------------
@@ -38,8 +42,14 @@ def save_recipes(selected_data, new_data, output_text):
             integer_list.append(int(x))
 
     if int(min(integer_list)) <= 0:
-        output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
+        show_error_message(f"Please select more than 0 recipes and make sure every selection is valid.\n")
         return
+
+    for val in current_saved_recipe_list:
+        if int(val) < 0 or int(val) > len(selected_data["hits"]):
+            show_error_message(f"Please make sure your number is greater than 0 and less than total recipes "
+                               f"searched.\n")
+            return
 
     output_text.insert(END, f"Here is what you selected: {integer_list}\n")
     output_text.insert(END, "******* Adding recipes to saved recipes... *******\n")
@@ -82,6 +92,19 @@ def show_help():
                              "preference is instead to browse for a recipe, then this button will direct you to a "
                              "better resource to complete a browsing experience, as it falls outside the scope of this "
                              "project.\n\n")
+
+
+def show_error_message(message):
+    error_window = Toplevel(root)
+    error_window.title("Error")
+
+    error_text = Text(error_window, width=50, height=5)
+    error_text.pack()
+
+    error_text.insert(END, message)
+
+    ok_button = Button(error_window, text="OK", command=error_window.destroy)
+    ok_button.pack()
 
 
 """
