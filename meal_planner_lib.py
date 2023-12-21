@@ -1,12 +1,8 @@
 import webbrowser
-import requests
-import random
-import docx
 import json
 import requests
 import random
 from tkinter import *
-from tkinter import scrolledtext, Tk, Button, messagebox
 from docx import Document
 
 #TODO: figure out venv implementation so that installing packages aren't required
@@ -144,7 +140,14 @@ def search_recipes(output_text, excluded_ingredients_entry, ingredients_entry, n
     if not ingredients:
         output_text.insert(END, "Please enter the number of recipes.\n")
         return
-    num_recipes = int(num_recipes_entry.get())
+    try:
+        num_recipes = int(num_recipes_entry.get())
+    except ValueError:
+        output_text.insert(END, "Please input a valid number.")
+        return
+    if num_recipes <= 0:
+        output_text.insert(END, "Please enter a valid positive number for the number of recipes.")
+        return
     # Add your logic for searching recipes here
     if ingredients:
         food_list = argument_handler(ingredients)

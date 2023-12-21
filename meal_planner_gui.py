@@ -98,7 +98,9 @@ def show_error_message(message):
     error_window = Toplevel(root)
     error_window.title("Error")
 
-    error_text = Text(error_window, width=50, height=5)
+    bg_color = root.cget("bg")
+
+    error_text = Text(error_window, width=50, height=5, font=('Times New Roman', 18, 'bold'), bg=bg_color, wrap="word")
     error_text.pack()
 
     error_text.insert(END, message)
