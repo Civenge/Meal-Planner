@@ -5,6 +5,7 @@ from art import *
 import webbrowser
 import meal_planner_lib
 from colorama import init, Fore, Style
+
 # initialize colorama module
 init()
 
@@ -46,8 +47,6 @@ print("* Start by inputting some ingredients that you want to use to find a reci
 print("* There will be an opportunity to export any saved recipes at the end of the search.")
 print("* Would you like more information about this program prior to starting the search? (Yes or No)\n")
 
-# global to store recipes
-new_data = {"hits": []}
 
 user_input = input().lower()
 if user_input == "yes" or user_input == "y":
@@ -71,8 +70,6 @@ if browse_recipes.lower() == "browse" or browse_recipes.lower() == "b":
 
 # create variables to store ingredients and saved recipes between loop runs
 ingredients = None
-selected_data = None
-
 
 while True:
     food_list = None
@@ -127,12 +124,12 @@ while True:
             print(color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
             continue
         selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
-        selected_data = {
-             "hits": selected_recipes
+        meal_planner_lib.selected_data = {
+            "hits": selected_recipes
         }
 
         # prints out the nicely formatted recipe results
-        for i, recipe_data in enumerate(selected_data["hits"], start=1):
+        for i, recipe_data in enumerate(meal_planner_lib.selected_data["hits"], start=1):
             recipe = recipe_data["recipe"]
             recipe_url = recipe["url"]
             recipe_name = recipe["label"]
@@ -175,7 +172,7 @@ while True:
                 continue
 
             # check for negative inputs
-            if int(min(integer_list)) <= 0:
+            if int(min(integer_list)) <= 0 or int(max(integer_list)) > len(meal_planner_lib.selected_data["hits"]):
                 print(color_text_red(f"Please select more than 0 recipes and make sure every selection is valid."))
                 continue
 
@@ -185,7 +182,8 @@ while True:
                 print(color_text_green("******* Adding recipes to saved recipes... *******\n"))
 
                 for idx in range(len(integer_list)):
-                    new_data["hits"].append(selected_data["hits"][integer_list[idx] - 1])
+                    meal_planner_lib.new_data["hits"].append(
+                        meal_planner_lib.selected_data["hits"][integer_list[idx] - 1])
                 break
 
             else:
@@ -199,7 +197,7 @@ while True:
         total_recipes = []
         just_ingredients = []
         modified_data = [total_recipes, just_ingredients]
-        for i, recipe_data in enumerate(new_data['hits'], start=1):
+        for i, recipe_data in enumerate(meal_planner_lib.new_data['hits'], start=1):
             # rename the recipe so they go in ascending order
             new_name = 'recipe ' + str(i)
 
