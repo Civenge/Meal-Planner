@@ -115,6 +115,11 @@ def save_recipes(output_text):
         return
 
     for val in current_saved_recipe_list:
+        try:
+            int(val)
+        except ValueError:
+            show_error_message("Please input a valid number.\n")
+            return
         if int(val) < 0 or int(val) > len(meal_planner_lib.selected_data["hits"]):
             show_error_message(f"Please make sure your number is greater than 0 and less than total recipes "
                                f"searched.\n")
