@@ -67,7 +67,7 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
         dict_from_json = json.loads(response.text)
         if not dict_from_json["hits"]:
             output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
-            exit(1)
+            return
         selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
         meal_planner_lib.selected_data = {
             "hits": selected_recipes
