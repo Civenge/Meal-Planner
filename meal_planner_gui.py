@@ -40,7 +40,7 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
         show_error_message("Please input a valid number.\n")
         return
     if num_recipes <= 0 or num_recipes > 20:
-        show_error_message("Please enter a valid positive number for the number of recipes.\n")
+        show_error_message("Please enter a valid positive number for the number of recipes (between 1 and 20).\n")
         return
     # Add your logic for searching recipes here
     if ingredients:
