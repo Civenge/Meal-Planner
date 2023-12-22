@@ -3,8 +3,10 @@ import requests
 import random
 from art import *
 import webbrowser
-from docx import Document
+import meal_planner_lib
 from colorama import init, Fore, Style
+
+# initialize colorama module
 init()
 
 """
@@ -31,71 +33,6 @@ def color_text_red(text):
     return Fore.RED + text + Style.RESET_ALL
 
 
-def argument_handler(*args):
-    if not args:
-        return "You need to provide at least 1 argument."
-    else:
-        return list(args)
-
-
-def remove_str_chars(input_string, num):
-    if num >= 0:
-        return input_string[:-num]
-    else:
-        return input_string
-
-
-def process_food_list(input_list):
-    request_string = ""
-    for food in input_list:
-        request_string = request_string + food + "%2c%20"
-    # remove the last %2c%20 from the collated string which is unicode for ", "
-    api_string = remove_str_chars(request_string, 6)
-    return api_string
-
-
-def create_recipe_document(recipe_list):
-    # create new document
-    doc = Document()
-    # add heading
-    doc.add_heading("Saved Recipes")
-
-    # add each recipe to document
-    for recipe_info in recipe_list[0]:
-        for result_number, recipe_details in recipe_info.items():
-            title_paragraph = doc.add_paragraph()
-            runner = title_paragraph.add_run(f"Recipe Title: {recipe_details['recipe']['label']}")
-            runner.bold = True
-            doc.add_paragraph(f"URL: {recipe_details['recipe']['url']}")
-
-            # add ingredients as bulleted list
-            doc.add_paragraph(f"Ingredients: ")
-            for each_ingredient in recipe_details['recipe']['ingredientLines']:
-                ingredient_paragraph = doc.add_paragraph(f"{each_ingredient}")
-                ingredient_paragraph.style = 'List Bullet'
-
-            doc.add_paragraph("\n")
-
-    response_filename = 'Recipes.docx'
-    doc.save(response_filename)
-
-
-def create_ingredients_document(formatted_data):
-    # create new document
-    doc = Document()
-    # add heading
-    doc.add_heading("Ingredients List")
-
-    # add each recipe to document
-    for recipe_info in formatted_data[0]:
-        for result_number, recipe_details in recipe_info.items():
-            for recipe_ingredient in recipe_details['recipe']['ingredientLines']:
-                doc.add_paragraph(f"{recipe_ingredient}")
-
-    response_filename = 'Ingredients List.docx'
-    doc.save(response_filename)
-
-
 """
 ----------------------------------------------------------------------------
 Main Program
@@ -110,8 +47,6 @@ print("* Start by inputting some ingredients that you want to use to find a reci
 print("* There will be an opportunity to export any saved recipes at the end of the search.")
 print("* Would you like more information about this program prior to starting the search? (Yes or No)\n")
 
-# global to store recipes
-new_data = {"hits": []}
 
 user_input = input().lower()
 if user_input == "yes" or user_input == "y":
@@ -135,16 +70,14 @@ if browse_recipes.lower() == "browse" or browse_recipes.lower() == "b":
 
 # create variables to store ingredients and saved recipes between loop runs
 ingredients = None
-selected_data = None
-
 
 while True:
     food_list = None
     while food_list is None:
         ingredients = input("What ingredients do you want to use (chicken, cheese, etc)?\n")
         if ingredients:
-            food_list = argument_handler(ingredients)
-            formatted_string = process_food_list(food_list)
+            food_list = meal_planner_lib.argument_handler(ingredients)
+            formatted_string = meal_planner_lib.process_food_list(food_list)
             test_response = requests.get(
                 "https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
                 "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&random=true&field=url&field=label"
@@ -167,11 +100,11 @@ while True:
         recipe_count = ""
         num_recipes = None
 
-    formatted_string = process_food_list(food_list)
+    formatted_string = meal_planner_lib.process_food_list(food_list)
 
     excluded_ingredients_str = input(
         "Please type out any ingredients you want excluded from the list (rice, bread), or press Enter to skip.\n")
-    excluded_ingredients_list = argument_handler(excluded_ingredients_str)
+    excluded_ingredients_list = meal_planner_lib.argument_handler(excluded_ingredients_str)
 
     if excluded_ingredients_list:
         print(f"Excluding these ingredients:{excluded_ingredients_list}")
@@ -189,14 +122,14 @@ while True:
         dict_from_json = json.loads(response.text)
         if not dict_from_json["hits"]:
             print(color_text_red(f"Your search for {ingredients} found no recipes, please try again."))
-            exit(1)
+            continue
         selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
-        selected_data = {
-             "hits": selected_recipes
+        meal_planner_lib.selected_data = {
+            "hits": selected_recipes
         }
 
         # prints out the nicely formatted recipe results
-        for i, recipe_data in enumerate(selected_data["hits"], start=1):
+        for i, recipe_data in enumerate(meal_planner_lib.selected_data["hits"], start=1):
             recipe = recipe_data["recipe"]
             recipe_url = recipe["url"]
             recipe_name = recipe["label"]
@@ -234,8 +167,12 @@ while True:
                 if stripped_x.isdigit():
                     integer_list.append(int(x))
 
+            if len(integer_list) < 1:
+                print(color_text_red(f"Please select more than 0 recipes and make sure every selection is valid."))
+                continue
+
             # check for negative inputs
-            if int(min(integer_list)) <= 0:
+            if int(min(integer_list)) <= 0 or int(max(integer_list)) > len(meal_planner_lib.selected_data["hits"]):
                 print(color_text_red(f"Please select more than 0 recipes and make sure every selection is valid."))
                 continue
 
@@ -245,7 +182,8 @@ while True:
                 print(color_text_green("******* Adding recipes to saved recipes... *******\n"))
 
                 for idx in range(len(integer_list)):
-                    new_data["hits"].append(selected_data["hits"][integer_list[idx] - 1])
+                    meal_planner_lib.new_data["hits"].append(
+                        meal_planner_lib.selected_data["hits"][integer_list[idx] - 1])
                 break
 
             else:
@@ -259,7 +197,7 @@ while True:
         total_recipes = []
         just_ingredients = []
         modified_data = [total_recipes, just_ingredients]
-        for i, recipe_data in enumerate(new_data['hits'], start=1):
+        for i, recipe_data in enumerate(meal_planner_lib.new_data['hits'], start=1):
             # rename the recipe so they go in ascending order
             new_name = 'recipe ' + str(i)
 
@@ -291,19 +229,19 @@ while True:
                 if ask_what_store == "1":
                     print("Creating \"Recipes.docx\"")
                     # function to print out the saved recipe in a Word document
-                    create_recipe_document(modified_data)
+                    meal_planner_lib.create_recipe_document()
                     break
 
                 elif ask_what_store == "2":
                     print("Creating \"Ingredients List.docx\"")
                     # function to print out the ingredients list in a Word document
-                    create_ingredients_document(modified_data)
+                    meal_planner_lib.create_ingredients_document()
                     break
 
                 elif ask_what_store == "3":
                     print("Creating both \"Recipes.docx\" and \"Ingredients List.docx\"")
-                    create_recipe_document(modified_data)
-                    create_ingredients_document(modified_data)
+                    meal_planner_lib.create_recipe_document()
+                    meal_planner_lib.create_ingredients_document()
                     break
 
                 elif ask_what_store == "0":

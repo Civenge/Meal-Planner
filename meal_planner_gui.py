@@ -1,10 +1,9 @@
 import json
-import requests
-import random
 from tkinter import *
 from tkinter import scrolledtext, Tk, Button, messagebox
-import webbrowser
-from docx import Document
+import requests
+import meal_planner_lib
+import random
 
 """
 This project uses the edamam API to obtain recipes, with the API information below:
@@ -13,14 +12,12 @@ This project uses the edamam API to obtain recipes, with the API information bel
 
 Requires installation of docx via "pip install python-docx" in console.
 """
-"""
-----------------------------------------------------------------------------
-Globals
-----------------------------------------------------------------------------
-"""
-# global to store recipes
-new_data = {"hits": []}
-selected_data = {"hits": []}
+global excluded_ingredients_entry
+global ingredients_entry
+global num_recipes_entry
+global saved_recipes_entry
+global root
+
 
 """
 ----------------------------------------------------------------------------
@@ -29,48 +26,26 @@ Functions
 """
 
 
-def argument_handler(*args):
-    if not args:
-        return "You need to provide at least 1 argument."
-    else:
-        return list(args)
-
-
-def remove_str_chars(input_string, num):
-    if num >= 0:
-        return input_string[:-num]
-    else:
-        return input_string
-
-
-def process_food_list(input_list):
-    request_string = ""
-    for food in input_list:
-        request_string = request_string + food + "%2c%20"
-    # remove the last %2c%20 from the collated string which is unicode for ", "
-    api_string = remove_str_chars(request_string, 6)
-    return api_string
-
-
-def browse_recipes():
-    url = "https://www.allrecipes.com/"
-    webbrowser.open(url)
-
-
-def search_recipes():
-    global selected_data
+def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_entry_param, num_recipes_entry_param):
     # clear existing text
     output_text.delete(1.0, END)
-    excluded_ingredients_str = excluded_ingredients_entry.get()
-    ingredients = ingredients_entry.get()
+    excluded_ingredients_str = excluded_ingredients_entry_param.get()
+    ingredients = ingredients_entry_param.get()
     if not ingredients:
-        output_text.insert(END, "Please enter the number of recipes.\n")
+        show_error_message("Please enter the number of recipes.\n")
         return
-    num_recipes = int(num_recipes_entry.get())
+    try:
+        num_recipes = int(num_recipes_entry_param.get())
+    except ValueError:
+        show_error_message("Please input a valid number.\n")
+        return
+    if num_recipes <= 0 or num_recipes > 20:
+        show_error_message("Please enter a valid positive number for the number of recipes (between 1 and 20).\n")
+        return
     # Add your logic for searching recipes here
     if ingredients:
-        food_list = argument_handler(ingredients)
-        formatted_string = process_food_list(food_list)
+        food_list = meal_planner_lib.argument_handler(ingredients)
+        formatted_string = meal_planner_lib.process_food_list(food_list)
         test_response = requests.get(
             "https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
             "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&random=true&field=url&field=label"
@@ -80,9 +55,9 @@ def search_recipes():
             output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
             return
     else:
-        output_text.insert(END, "Please select at least one ingredient.\n")
+        show_error_message("Please select at least one ingredient.\n")
         return
-    formatted_string = process_food_list(food_list)
+    formatted_string = meal_planner_lib.process_food_list(food_list)
 
     response = requests.get("https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
                             "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&" + excluded_ingredients_str +
@@ -92,12 +67,12 @@ def search_recipes():
         dict_from_json = json.loads(response.text)
         if not dict_from_json["hits"]:
             output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
-            exit(1)
+            return
         selected_recipes = random.sample(dict_from_json["hits"], num_recipes)
-        selected_data = {
-             "hits": selected_recipes
+        meal_planner_lib.selected_data = {
+            "hits": selected_recipes
         }
-        for i, recipe_data in enumerate(selected_data["hits"], start=1):
+        for i, recipe_data in enumerate(meal_planner_lib.selected_data["hits"], start=1):
             recipe = recipe_data["recipe"]
             recipe_url = recipe["url"]
             recipe_name = recipe["label"]
@@ -116,10 +91,7 @@ def search_recipes():
         output_text.insert(END, f"API request failed with status code: {response.status_code}")
 
 
-def save_recipes():
-    global selected_data
-    global new_data
-    global output_text
+def save_recipes(output_text):
     saved_recipes = saved_recipes_entry.get()
     if not saved_recipes:
         output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
@@ -139,111 +111,32 @@ def save_recipes():
             integer_list.append(int(x))
 
     if int(min(integer_list)) <= 0:
-        output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
+        show_error_message(f"Please select more than 0 recipes and make sure every selection is valid.\n")
         return
+
+    for val in current_saved_recipe_list:
+        try:
+            int(val)
+        except ValueError:
+            show_error_message("Please input a valid number.\n")
+            return
+        if int(val) < 0 or int(val) > len(meal_planner_lib.selected_data["hits"]):
+            show_error_message(f"Please make sure your number is greater than 0 and less than total recipes "
+                               f"searched.\n")
+            return
 
     output_text.insert(END, f"Here is what you selected: {integer_list}\n")
     output_text.insert(END, "******* Adding recipes to saved recipes... *******\n")
 
     for idx in range(len(integer_list)):
-        new_data["hits"].append(selected_data["hits"][integer_list[idx] - 1])
+        meal_planner_lib.new_data["hits"].append(meal_planner_lib.selected_data["hits"][integer_list[idx] - 1])
 
     return
-
-
-def create_recipe_document():
-    total_recipes = []
-    just_ingredients = []
-    modified_data = [total_recipes, just_ingredients]
-
-    # create new document
-    doc = Document()
-    # add heading
-    doc.add_heading("Saved Recipes")
-
-    for i, recipe_data in enumerate(new_data['hits'], start=1):
-        # rename the recipe so they go in ascending order
-        new_name = 'recipe ' + str(i)
-
-        # create the new recipe dictionary
-        new_recipe = {new_name: recipe_data}
-
-        # add new recipe to list
-        total_recipes.append(new_recipe)
-
-        # isolate the ingredients list from the recipe
-        new_ingredients = {new_name + ' ingredients': recipe_data['recipe']['ingredientLines']}
-
-        # add isolated ingredients to list of ingredients
-        just_ingredients.append(new_ingredients)
-
-    # add each recipe to document
-    for recipe_info in modified_data[0]:
-        for result_number, recipe_details in recipe_info.items():
-            title_paragraph = doc.add_paragraph()
-            runner = title_paragraph.add_run(f"Recipe Title: {recipe_details['recipe']['label']}")
-            runner.bold = True
-            doc.add_paragraph(f"URL: {recipe_details['recipe']['url']}")
-
-            # add ingredients as bulleted list
-            doc.add_paragraph(f"Ingredients: ")
-            for each_ingredient in recipe_details['recipe']['ingredientLines']:
-                ingredient_paragraph = doc.add_paragraph(f"{each_ingredient}")
-                ingredient_paragraph.style = 'List Bullet'
-
-            doc.add_paragraph("\n")
-
-    response_filename = 'Recipes.docx'
-    doc.save(response_filename)
-
-    output_text.insert(END, "Creating 'Recipes.docx' file...\n")
-
-
-def create_ingredients_document():
-    total_recipes = []
-    just_ingredients = []
-    modified_data = [total_recipes, just_ingredients]
-    for i, recipe_data in enumerate(new_data['hits'], start=1):
-        # rename the recipe so they go in ascending order
-        new_name = 'recipe ' + str(i)
-
-        # create the new recipe dictionary
-        new_recipe = {new_name: recipe_data}
-
-        # add new recipe to list
-        total_recipes.append(new_recipe)
-
-        # isolate the ingredients list from the recipe
-        new_ingredients = {new_name + ' ingredients': recipe_data['recipe']['ingredientLines']}
-
-        # add isolated ingredients to list of ingredients
-        just_ingredients.append(new_ingredients)
-
-    # create new document
-    doc = Document()
-    # add heading
-    doc.add_heading("Ingredients List")
-
-    # add each recipe to document
-    for recipe_info in modified_data[0]:
-        for result_number, recipe_details in recipe_info.items():
-            for recipe_ingredient in recipe_details['recipe']['ingredientLines']:
-                doc.add_paragraph(f"{recipe_ingredient}")
-
-    response_filename = 'Ingredients List.docx'
-    doc.save(response_filename)
-
-    output_text.insert(END, "Creating 'Ingredients List.docx' file...\n")
 
 
 def exit_app():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
         root.destroy()
-
-
-def open_url(url):
-    import webbrowser
-    webbrowser.open(url)
 
 
 def show_help():
@@ -260,7 +153,7 @@ def show_help():
     help_text.insert(INSERT, "Video demonstration\n\n", "link")
 
     # Bind the click event to open the URL
-    help_text.tag_bind("link", "<Button-1>", lambda event: open_url("https://youtu.be/aXo--GO7ogc"))
+    help_text.tag_bind("link", "<Button-1>", lambda event: meal_planner_lib.open_url("https://youtu.be/aXo--GO7ogc"))
 
     # Insert the URL link with the "link" tag
     help_text.insert(INSERT, "This application is designed to be run from top to bottom.  Fill in each box and use the "
@@ -275,21 +168,42 @@ def show_help():
                              "project.\n\n")
 
 
+def show_error_message(message):
+    error_window = Toplevel(root)
+    error_window.title("Error")
 
+    bg_color = root.cget("bg")
+
+    error_text = Text(error_window, width=50, height=5, font=('Times New Roman', 18, 'bold'), bg=bg_color, wrap="word")
+    error_text.pack()
+
+    error_text.insert(END, message)
+
+    ok_button = Button(error_window, text="OK", command=error_window.destroy)
+    ok_button.pack()
+
+
+"""
+----------------------------------------------------------------------------
+Main Program
+----------------------------------------------------------------------------
+"""
 
 
 def main():
-    global output_text
     global excluded_ingredients_entry
     global ingredients_entry
     global num_recipes_entry
     global saved_recipes_entry
     global root
-    """
-    ----------------------------------------------------------------------------
-    Main Program
-    ----------------------------------------------------------------------------
-    """
+
+    def _create_recipe_document():
+        meal_planner_lib.create_recipe_document()
+        output_text.insert(END, "Creating 'Recipes.docx' file...\n")
+
+    def _create_ingredients_document():
+        meal_planner_lib.create_ingredients_document()
+        output_text.insert(END, "Creating 'Ingredients List.docx' file...\n")
 
     root = Tk()
     root.title("Meal Planner")
@@ -330,10 +244,12 @@ def main():
     button_frame = Frame(root)
     button_frame.pack()
 
-    search_button = Button(button_frame, text="Search Recipes", command=search_recipes)
+    search_button = Button(button_frame, text="Search Recipes",
+                           command=lambda: search_recipes(output_text, excluded_ingredients_entry,
+                                                          ingredients_entry, num_recipes_entry))
     search_button.pack(side=LEFT)
 
-    browse_button = Button(button_frame, text="Browse Recipes", command=browse_recipes)
+    browse_button = Button(button_frame, text="Browse Recipes", command=meal_planner_lib.browse_recipes)
     browse_button.pack(side=RIGHT)
 
     saved_recipes_label = Label(root, text="Enter recipe numbers to save (Ex: 1, 2, 4)")
@@ -342,18 +258,19 @@ def main():
     saved_recipes_entry = Entry(root)
     saved_recipes_entry.pack()
 
-    save_recipe_button = Button(text="Save Recipes", command=save_recipes)
+    save_recipe_button = Button(text="Save Recipes",
+                                command=lambda: save_recipes(output_text))
     save_recipe_button.pack()
 
     button_frame2 = Frame(root)
     button_frame2.pack()
 
     export_recipe_to_word_button = Button(button_frame2, text="Export Saved Recipes to Word",
-                                          command=create_recipe_document)
+                                          command=_create_recipe_document)
     export_recipe_to_word_button.pack(side=LEFT)
 
     export_ingredients_to_word_button = Button(button_frame2, text="Export Saved Ingredients to Word",
-                                               command=create_ingredients_document)
+                                               command=_create_ingredients_document)
     export_ingredients_to_word_button.pack(side=RIGHT)
 
     exit_button = Button(root, text="Exit", command=exit_app)
