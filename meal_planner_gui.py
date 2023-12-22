@@ -94,7 +94,7 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
 def save_recipes(output_text):
     saved_recipes = saved_recipes_entry.get()
     if not saved_recipes:
-        output_text.insert(END, f"Please select more than 0 recipes and make sure every selection is valid.")
+        show_error_message(f"Please select more than 0 recipes and make sure every selection is valid.\n")
         return
     split_values = saved_recipes.split(',')
     # remove whitespace in list
