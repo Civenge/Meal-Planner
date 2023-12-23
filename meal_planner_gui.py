@@ -42,26 +42,21 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
     if num_recipes <= 0 or num_recipes > 20:
         show_error_message("Please enter a valid positive number for the number of recipes (between 1 and 20).\n")
         return
-    # Add your logic for searching recipes here
+
     if ingredients:
         food_list = meal_planner_lib.argument_handler(ingredients)
         formatted_string = meal_planner_lib.process_food_list(food_list)
-        test_response = requests.get(
-            "https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
-            "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&random=true&field=url&field=label"
-            "&field=ingredientLines")
-        dict_from_json = json.loads(test_response.text)
+        response = requests.get("https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
+                                "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&" + excluded_ingredients_str
+                                + "&random=true&field=url&field=label&field=ingredientLines")
+        dict_from_json = json.loads(response.text)
         if not dict_from_json["hits"]:
             output_text.insert(END, f"Your search for {ingredients} found no recipes, please try again.")
             return
     else:
         show_error_message("Please select at least one ingredient.\n")
         return
-    formatted_string = meal_planner_lib.process_food_list(food_list)
 
-    response = requests.get("https://api.edamam.com/api/recipes/v2?type=public&q=" + formatted_string +
-                            "&app_id=2286dd85&app_key=1cdfcd395ccf99e349b18f54eaa4416f&" + excluded_ingredients_str +
-                            "&random=true&field=url&field=label&field=ingredientLines")
     if response.status_code == 200:
         # parse the json
         dict_from_json = json.loads(response.text)
@@ -78,7 +73,7 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
             recipe_name = recipe["label"]
             ingredients = recipe_data["recipe"]["ingredientLines"]
 
-            # Append the recipe information to the text widget
+            # append the recipe information to the text widget
             output_text.insert(END, f"Recipe{i}: {recipe_name}\n")
             output_text.insert(END, f"Url: {recipe_url}\n")
 
@@ -125,8 +120,8 @@ def save_recipes(output_text):
                                f"searched.\n")
             return
 
-    output_text.insert(END, f"Here is what you selected: {integer_list}\n")
-    output_text.insert(END, "******* Adding recipes to saved recipes... *******\n")
+    output_text.insert("1.0", f"Here is what you selected: {integer_list}\n")
+    output_text.insert("2.0", "******* Adding recipes to saved recipes... *******\n\n")
 
     for idx in range(len(integer_list)):
         meal_planner_lib.new_data["hits"].append(meal_planner_lib.selected_data["hits"][integer_list[idx] - 1])
@@ -146,16 +141,16 @@ def show_help():
     help_text = Text(help_window, width=70, height=20, wrap="word")
     help_text.pack()
     help_text.insert(INSERT, "The following link is a video to show how to use the Meal Planning App:\n\n")
-    # Add a tag for the URL link
+    # add a tag for the URL link
     help_text.tag_configure("link", foreground="blue", underline=True)
 
-    # Insert the URL link with the "link" tag
+    # insert the URL link with the "link" tag
     help_text.insert(INSERT, "Video demonstration\n\n", "link")
 
-    # Bind the click event to open the URL
+    # bind the click event to open the URL
     help_text.tag_bind("link", "<Button-1>", lambda event: meal_planner_lib.open_url("https://youtu.be/aXo--GO7ogc"))
 
-    # Insert the URL link with the "link" tag
+    # insert the URL link with the "link" tag
     help_text.insert(INSERT, "This application is designed to be run from top to bottom.  Fill in each box and use the "
                              "associated buttons.  Using the buttons without having filled in the appropriate box with "
                              "valid information will lead to incorrect behavior.\n\n"
