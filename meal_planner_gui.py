@@ -73,12 +73,14 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
             recipe_name = recipe["label"]
             ingredients = recipe_data["recipe"]["ingredientLines"]
 
+            output_text.tag_configure(f"url_tag{i}", foreground="blue", underline=True)
+            output_text.tag_bind(f"url_tag{i}", "<Button-1>", lambda e, url=recipe_url: meal_planner_lib.open_url(url))
+
             # append the recipe information to the text widget
             output_text.insert(END, f"Recipe{i}: {recipe_name}\n")
             # add working URL link
-            output_text.insert(END, f"Url: {recipe_url}\n", "url_tag")
-            output_text.tag_configure("url_tag", foreground="blue", underline=True)
-            output_text.tag_bind("url_tag", "<Button-1>", lambda e, url=recipe_url: meal_planner_lib.open_url(url))
+            output_text.insert(END, f"Url: {recipe_url}\n", f"url_tag{i}")
+
 
             for ingredient in ingredients:
                 output_text.insert(END, f"  {ingredient}\n")
