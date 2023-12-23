@@ -177,12 +177,31 @@ def show_error_message(message):
     ok_button = Button(error_window, text="OK", command=error_window.destroy)
     ok_button.pack()
 
-def show_new_data_contents():
-    new_data_window = Toplevel(root)
-    new_data_window.title("Saved Recipe Preview")
 
-    new_data_text = Text(new_data_window, width=70, height=50, wrap="word")
-    new_data_text.pack()
+def show_new_data_contents():
+    # check if new_data_window exists, is not None, and has not been destroyed
+    if hasattr(show_new_data_contents, "new_data_window") and getattr(show_new_data_contents, "new_data_window", None) \
+            and not show_new_data_contents.new_data_window.winfo_exists():
+        # the window has been destroyed and will need to be recreated
+        show_new_data_contents.new_data_window = None
+
+    # check if new_data_window doesn't exist or is None
+    if not hasattr(show_new_data_contents, "new_data_window") or not getattr(show_new_data_contents, "new_data_window",
+                                                                             None):
+        # create new window
+        new_data_window = Toplevel(root)
+        new_data_window.title("Saved Recipe Preview")
+        show_new_data_contents.new_data_window = new_data_window
+
+        new_data_text = Text(new_data_window, width=70, height=50, wrap="word")
+        new_data_text.pack()
+        show_new_data_contents.new_data_text = new_data_text
+
+    # new_data_window exists, use it and clear text
+    else:
+        new_data_text = show_new_data_contents.new_data_text
+        # clear existing text
+        new_data_text.delete(1.0, END)
 
     for i, recipe_data in enumerate(meal_planner_lib.new_data["hits"], start=1):
         recipe = recipe_data["recipe"]
@@ -285,7 +304,8 @@ def main():
                                 command=lambda: save_recipes(output_text))
     save_recipe_button.pack(side=LEFT)
 
-    show_saved_recipes_preview_button = Button(button_frame_save_recipes, text="Preview of Saved Recipes", command=show_new_data_contents)
+    show_saved_recipes_preview_button = Button(button_frame_save_recipes, text="Preview of Saved Recipes",
+                                               command=show_new_data_contents)
     show_saved_recipes_preview_button.pack()
 
     button_frame_export_word = Frame(root)
