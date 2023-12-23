@@ -178,6 +178,50 @@ def show_error_message(message):
     ok_button.pack()
 
 
+def show_new_data_contents():
+    # check if new_data_window exists, is not None, and has not been destroyed
+    if hasattr(show_new_data_contents, "new_data_window") and getattr(show_new_data_contents, "new_data_window", None) \
+            and not show_new_data_contents.new_data_window.winfo_exists():
+        # the window has been destroyed and will need to be recreated
+        show_new_data_contents.new_data_window = None
+
+    # check if new_data_window doesn't exist or is None
+    if not hasattr(show_new_data_contents, "new_data_window") or not getattr(show_new_data_contents, "new_data_window",
+                                                                             None):
+        # create new window
+        new_data_window = Toplevel(root)
+        new_data_window.title("Saved Recipes Preview")
+        show_new_data_contents.new_data_window = new_data_window
+
+        new_data_text = Text(new_data_window, width=70, height=50, wrap="word")
+        new_data_text.pack()
+        show_new_data_contents.new_data_text = new_data_text
+
+    # new_data_window exists, use it and clear text
+    else:
+        new_data_text = show_new_data_contents.new_data_text
+        # clear existing text
+        new_data_text.delete(1.0, END)
+
+    for i, recipe_data in enumerate(meal_planner_lib.new_data["hits"], start=1):
+        recipe = recipe_data["recipe"]
+        recipe_url = recipe["url"]
+        recipe_name = recipe["label"]
+        ingredients = recipe_data["recipe"]["ingredientLines"]
+
+        # append the recipe information to the text widget
+        new_data_text.insert(END, f"Recipe{i}: {recipe_name}\n")
+        new_data_text.insert(END, f"Url: {recipe_url}\n")
+
+        for ingredient in ingredients:
+            new_data_text.insert(END, f"  {ingredient}\n")
+
+        new_data_text.insert(END, "\n")
+
+        font_tuple = ("Times New Roman", 12)
+        new_data_text.configure(font=font_tuple)
+
+
 """
 ----------------------------------------------------------------------------
 Main Program
@@ -253,18 +297,25 @@ def main():
     saved_recipes_entry = Entry(root)
     saved_recipes_entry.pack()
 
-    save_recipe_button = Button(text="Save Recipes",
+    button_frame_save_recipes = Frame(root)
+    button_frame_save_recipes.pack()
+
+    save_recipe_button = Button(button_frame_save_recipes, text="Save Recipes",
                                 command=lambda: save_recipes(output_text))
-    save_recipe_button.pack()
+    save_recipe_button.pack(side=LEFT)
 
-    button_frame2 = Frame(root)
-    button_frame2.pack()
+    show_saved_recipes_preview_button = Button(button_frame_save_recipes, text="Preview of Saved Recipes",
+                                               command=show_new_data_contents)
+    show_saved_recipes_preview_button.pack()
 
-    export_recipe_to_word_button = Button(button_frame2, text="Export Saved Recipes to Word",
+    button_frame_export_word = Frame(root)
+    button_frame_export_word.pack()
+
+    export_recipe_to_word_button = Button(button_frame_export_word, text="Export Saved Recipes to Word",
                                           command=_create_recipe_document)
     export_recipe_to_word_button.pack(side=LEFT)
 
-    export_ingredients_to_word_button = Button(button_frame2, text="Export Saved Ingredients to Word",
+    export_ingredients_to_word_button = Button(button_frame_export_word, text="Export Saved Ingredients to Word",
                                                command=_create_ingredients_document)
     export_ingredients_to_word_button.pack(side=RIGHT)
 
