@@ -75,7 +75,10 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
 
             # append the recipe information to the text widget
             output_text.insert(END, f"Recipe{i}: {recipe_name}\n")
-            output_text.insert(END, f"Url: {recipe_url}\n")
+            # add working URL link
+            output_text.insert(END, f"Url: {recipe_url}\n", "url_tag")
+            output_text.tag_configure("url_tag", foreground="blue", underline=True)
+            output_text.tag_bind("url_tag", "<Button-1>", lambda e, url=recipe_url: meal_planner_lib.open_url(url))
 
             for ingredient in ingredients:
                 output_text.insert(END, f"  {ingredient}\n")
@@ -322,7 +325,7 @@ def main():
     exit_button = Button(root, text="Exit", command=exit_app)
     exit_button.pack()
 
-    output_text = scrolledtext.ScrolledText(root, width=70, height=40)
+    output_text = scrolledtext.ScrolledText(root, width=70, height=40, wrap="word")
     output_text.pack()
 
     font_tuple = ("Times New Roman", 12)
