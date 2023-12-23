@@ -190,7 +190,7 @@ def show_new_data_contents():
                                                                              None):
         # create new window
         new_data_window = Toplevel(root)
-        new_data_window.title("Saved Recipe Preview")
+        new_data_window.title("Saved Recipes Preview")
         show_new_data_contents.new_data_window = new_data_window
 
         new_data_text = Text(new_data_window, width=70, height=50, wrap="word")
