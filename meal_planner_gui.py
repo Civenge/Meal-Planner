@@ -81,7 +81,6 @@ def search_recipes(output_text, excluded_ingredients_entry_param, ingredients_en
             # add working URL link
             output_text.insert(END, f"Url: {recipe_url}\n", f"url_tag{i}")
 
-
             for ingredient in ingredients:
                 output_text.insert(END, f"  {ingredient}\n")
 
