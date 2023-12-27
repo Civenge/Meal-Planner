@@ -2,11 +2,11 @@
 This application helps a user discover new recipes based upon user input.  Users are allowed to choose ingredients to include, ingredients to exclude, how many recipes they want to view, and then select from a list of recipes which they would like to save.  It will continue to allow for searches of different parameters until the user decides they have enough results.  Saving of recipes will persist between each search.  Once a user is complete with searching and selecting recipes they want to save, the user can then export all saved recipes into a Microsoft Word .docx format as recipes, ingredients lists, or both.
 
 # Running GUI in Virtual Environment
-In the folder where you cloned the repo, open the Python terminal and run:
-"venv\Scripts\activate"
-Then install the correct dependancies by running:
-"pip install -r requirements.txt"
-Finally run the application as you normally would, or from the terminal type:
+In the folder where you cloned the repo, open the Python terminal and run:  
+"venv\Scripts\activate"  
+Then install the correct dependancies by running:  
+"pip install -r requirements.txt"  
+Finally run the application as you normally would, or from the terminal type:  
 "python .\meal_planner_gui.py"
 
 # Video of Meal Planner App
