@@ -10,7 +10,7 @@ Finally run the application as you normally would, or from the terminal type:
 "python .\meal_planner_gui.py"
 
 # Video of Meal Planner App
-https://www.youtube.com/watch?v=aXo--GO7ogc
+https://youtu.be/-4FxLinui0Q
 
 # Recipe Data
 All recipe data is gathered based upon a custom API request to Edamam.  Each search yields a random result, so a user is unlikely to see the same recipe twice even given the same input.  The api can be found at: https://developer.edamam.com//admin/applications/1409623863337 with documentation located at: https://developer.edamam.com/edamam-docs-recipe-api
