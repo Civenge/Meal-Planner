@@ -9,7 +9,7 @@ Then install the correct dependancies by running:
 Finally run the application as you normally would, or from the terminal type:  
 "python .\meal_planner_gui.py"
 
-# Video of Meal Planner App
+# Demo Video of Meal Planner App GUI Version
 https://youtu.be/-4FxLinui0Q
 
 # Recipe Data
