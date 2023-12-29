@@ -152,7 +152,7 @@ def show_help():
     help_text.insert(INSERT, "Video demonstration\n\n", "link")
 
     # bind the click event to open the URL
-    help_text.tag_bind("link", "<Button-1>", lambda event: meal_planner_lib.open_url("https://youtu.be/aXo--GO7ogc"))
+    help_text.tag_bind("link", "<Button-1>", lambda event: meal_planner_lib.open_url("https://youtu.be/-4FxLinui0Q"))
 
     # insert the URL link with the "link" tag
     help_text.insert(INSERT, "This application is designed to be run from top to bottom.  Fill in each box and use the "
